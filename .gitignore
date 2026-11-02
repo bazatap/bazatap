@@ -1,0 +1,11 @@
+node_modules/
+coverage/
+*.log
+.DS_Store
+
+# internal strategy notes (keep out of the public repo)
+RESEARCH.md
+OPEN-SOURCE-PLAN.md
+
+# local run artifacts
+.bazatap/

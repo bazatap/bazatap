@@ -1,0 +1,31 @@
+{
+  "name": "bazatap",
+  "version": "0.2.0",
+  "description": "bazatap — see why AI agents fail to buy: scan UCP profiles and record agent traffic.",
+  "type": "module",
+  "bin": {
+    "bazatap": "bin/bazatap.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [
+    "ucp",
+    "agentic-commerce",
+    "universal-commerce-protocol",
+    "ai-agents",
+    "commerce",
+    "observability",
+    "proxy"
+  ],
+  "license": "Apache-2.0",
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ]
+}
