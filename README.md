@@ -9,6 +9,13 @@ support ticket. `bazatap` tells you why — before the agent gives up.
 npx bazatap scan allbirds.com
 ```
 
+> Not on npm yet. Until 0.2.0 is published:
+>
+> ```sh
+> git clone https://github.com/bazatap/bazatap && cd bazatap
+> node bin/bazatap.js scan allbirds.com
+> ```
+
 Two commands: `scan` checks what an agent can discover, `tap` records what
 actually happened when it tried.
 
