@@ -17,7 +17,7 @@ npx bazatap scan shop.example.com
 > ```
 
 Two commands: `scan` checks what an agent can discover, `tap` records what
-actually happened when it tried.
+actually happened when it tried. Crawl results live in [reports/](reports/).
 
 ## `scan` — what the agent sees
 
@@ -100,6 +100,28 @@ npm install -g bazatap
 
 Requires Node 20+. No dependencies, no build step.
 
+## Middleware — no proxy
+
+Pointing production traffic at a proxy is often a hard sell. Mount the recorder
+directly instead:
+
+```js
+import express from "express";
+import { bazatap } from "bazatap/express";
+
+const app = express();
+app.use(express.json());
+app.use(bazatap({ logPath: ".bazatap/events.jsonl" }));
+```
+
+It records the same rows as `tap` — method, path, status, operation, agent,
+failure, bodies — without sitting in front of the process. Mount it after the
+body parser so `req.body` is available. `middleware.summary()` returns the same
+object as the dashboard endpoint, and `middleware.close()` flushes the log.
+
+Response bodies are captured from `res.write`/`res.end`; request bodies come from
+`req.body`, never from the stream. `bodies: false` records metadata only.
+
 ## Reference implementations
 
 - **[samples](https://github.com/Universal-Commerce-Protocol/samples)** — the
@@ -125,8 +147,8 @@ less than running one non-Shopify implementation.
 
 ## Status
 
-`0.2.0` — `scan` and `tap`. Next: `tap` middleware packages, then `scan --ci`
-for release regression.
+`0.3.0` — `scan`, `tap`, and the Express middleware. Next: Next.js and
+Workers adapters, then `scan --ci` for release regression.
 
 ## Development
 
