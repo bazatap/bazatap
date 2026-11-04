@@ -140,7 +140,7 @@ test("tap does not record bodies with bodies=false", async () => {
     const res = await fetch(`${tap.url}/checkout-sessions`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ secret: "sk_live_123" }),
+      body: JSON.stringify({ secret: "do-not-record-me" }),
     });
     await res.json();
     const entry = JSON.parse(readFileSync(logPath, "utf8").trim());
