@@ -46,7 +46,7 @@ async function withServer(handler) {
 }
 
 test("resolveProfileUrl appends the well-known path to a bare domain", () => {
-  assert.equal(resolveProfileUrl("allbirds.com"), "https://allbirds.com/.well-known/ucp");
+  assert.equal(resolveProfileUrl("shop.example.com"), "https://shop.example.com/.well-known/ucp");
   assert.equal(
     resolveProfileUrl("https://shop.example.com/.well-known/ucp"),
     "https://shop.example.com/.well-known/ucp",

@@ -26,7 +26,7 @@ tap options:
   -v, --version   show the version
 
 Examples:
-  bazatap scan allbirds.com
+  bazatap scan shop.example.com
   bazatap scan shop.example.com --json
   bazatap tap --upstream http://localhost:3000
 

@@ -6,14 +6,14 @@ An AI agent finds the store, tries to buy, and fails. Today you find out from a
 support ticket. `bazatap` tells you why — before the agent gives up.
 
 ```sh
-npx bazatap scan allbirds.com
+npx bazatap scan shop.example.com
 ```
 
 > Not on npm yet. Until 0.2.0 is published:
 >
 > ```sh
 > git clone https://github.com/bazatap/bazatap && cd bazatap
-> node bin/bazatap.js scan allbirds.com
+> node bin/bazatap.js scan shop.example.com
 > ```
 
 Two commands: `scan` checks what an agent can discover, `tap` records what
@@ -100,6 +100,23 @@ npm install -g bazatap
 
 Requires Node 20+. No dependencies, no build step.
 
+## Reference implementations
+
+- **[samples](https://github.com/Universal-Commerce-Protocol/samples)** — the
+  official Python and Node servers. The best target for `tap`: you control it
+  and can force failures.
+- **[conformance](https://github.com/Universal-Commerce-Protocol/conformance)** —
+  the official test suite and its flower-shop fixture data.
+- **[playground](https://ucp.dev/latest/specification/shopping/playground/)** —
+  a browser-only simulation of the checkout flow. Useful for understanding,
+  not a server to point `tap` at.
+- **[UCPList](https://ucplist.ai/)** — directory of live merchants and tools, if
+  you want non-Shopify profiles to scan.
+
+Most live profiles today are Shopify-generated and near-identical: same
+capabilities, same version, no signing keys. Scanning ten DTC stores tells you
+less than running one non-Shopify implementation.
+
 ## What it does not do
 
 - It does not install anything on the store and needs no credentials.
@@ -115,7 +132,7 @@ for release regression.
 
 ```sh
 npm test                          # node --test, no dependencies
-node bin/bazatap.js scan allbirds.com
+node bin/bazatap.js scan shop.example.com
 node bin/bazatap.js tap --upstream=http://localhost:3000
 ```
 
