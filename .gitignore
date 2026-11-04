@@ -9,3 +9,6 @@ OPEN-SOURCE-PLAN.md
 
 # local run artifacts
 .bazatap/
+
+# crawl output (the corpus stays private)
+out/

@@ -1,0 +1,84 @@
+# Seed list for the State of Agent Commerce crawl.
+# Format: domain[,category] — categories drive the report's segmentation.
+# Keep this list stable between runs so month-over-month numbers mean something.
+
+# --- retail: DTC storefronts, mostly Shopify (from public UCP directories) ---
+allbirds.com retail
+glossier.com retail
+brooklinen.com retail
+colourpop.com retail
+everlane.com retail
+casper.com retail
+outdoorvoices.com retail
+rothys.com retail
+skims.com retail
+feastables.com retail
+liquid-iv.com retail
+ridgewallet.com retail
+untuckit.com retail
+mejuri.com retail
+tentree.com retail
+drsquatch.com retail
+beardbrand.com retail
+deathwishcoffee.com retail
+hauslabs.com retail
+fentybeauty.com retail
+olaplex.com retail
+sundayriley.com retail
+magicspoon.com retail
+blueland.com retail
+publicgoods.com retail
+thursdayboots.com retail
+cuyana.com retail
+cotopaxi.com retail
+marinelayer.com retail
+taylorstitch.com retail
+stance.com retail
+graza.co retail
+materialkitchen.com retail
+hedleyandbennett.com retail
+greatjonesgoods.com retail
+vitruvi.com retail
+gymshark.com retail
+bombas.com retail
+chubbiesshorts.com retail
+trueclassictees.com retail
+carawayhome.com retail
+fromourplace.com retail
+honeylove.com retail
+ekster.com retail
+parachutehome.com retail
+kith.com retail
+drinkspindrift.com retail
+wildone.com retail
+dagnedover.com retail
+
+# --- hospitality: brand sites and OTAs ---
+marriott.com hospitality
+hilton.com hospitality
+hyatt.com hospitality
+ihg.com hospitality
+accor.com hospitality
+choicehotels.com hospitality
+wyndham.com hospitality
+booking.com hospitality
+expedia.com hospitality
+trip.com hospitality
+
+# --- pms: property management and booking infrastructure ---
+mews.com pms
+apaleo.com pms
+cloudbeds.com pms
+siteminder.com pms
+amadeus.com pms
+sabre.com pms
+agilysys.com pms
+shiji.com pms
+
+# --- platform: commerce platforms and enterprise suites ---
+shopify.com platform
+bigcommerce.com platform
+salesforce.com platform
+commercetools.com platform
+vtex.com platform
+adobe.com platform

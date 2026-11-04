@@ -39,6 +39,7 @@ export function validateProfile(profile) {
     services: 0,
     transports: [],
     capabilities: 0,
+    capabilityNames: /** @type {string[]} */ ([]),
     vendorCapabilities: 0,
     handlers: 0,
     keys: 0,
@@ -181,6 +182,7 @@ export function validateProfile(profile) {
   } else if (!isObject(ucp.capabilities)) {
     findings.push(warn("BAD_CAPABILITIES", "`ucp.capabilities` is not an object."));
   } else {
+    summary.capabilityNames = Object.keys(ucp.capabilities);
     for (const [name, entries] of Object.entries(ucp.capabilities)) {
       if (!Array.isArray(entries) || entries.length === 0) {
         findings.push(

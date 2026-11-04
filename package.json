@@ -1,7 +1,7 @@
 {
   "name": "bazatap",
   "version": "0.2.0",
-  "description": "bazatap — see why AI agents fail to buy: scan UCP profiles and record agent traffic.",
+  "description": "bazatap \u2014 see why AI agents fail to buy: scan UCP profiles and record agent traffic.",
   "type": "module",
   "bin": {
     "bazatap": "bin/bazatap.js"
@@ -10,7 +10,9 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "crawl": "node scripts/crawl.mjs",
+    "report": "node scripts/report.mjs"
   },
   "keywords": [
     "ucp",
