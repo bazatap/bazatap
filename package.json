@@ -12,7 +12,8 @@
   "scripts": {
     "test": "node --test",
     "crawl": "node scripts/crawl.mjs",
-    "report": "node scripts/report.mjs"
+    "report": "node scripts/report.mjs",
+    "prepublishOnly": "npm test"
   },
   "keywords": [
     "ucp",
