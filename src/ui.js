@@ -39,6 +39,7 @@ export function renderDashboard() {
   <div class="card"><div class="label">Requests</div><div class="value" id="requests">0</div></div>
   <div class="card"><div class="label">Agent traffic</div><div class="value" id="ucp">0</div></div>
   <div class="card"><div class="label">Checkout attempts</div><div class="value" id="attempts">0</div></div>
+  <div class="card"><div class="label">Sessions created</div><div class="value" id="created">0</div></div>
   <div class="card"><div class="label">Completion rate</div><div class="value" id="acr">—</div></div>
 </div>
 
@@ -81,6 +82,7 @@ async function tick() {
   el("requests").textContent = data.requests;
   el("ucp").textContent = data.ucpRequests;
   el("attempts").textContent = data.checkout.attempts;
+  el("created").textContent = data.checkout.created;
   el("acr").textContent = data.checkout.completionRate === null ? "—" : Math.round(data.checkout.completionRate * 100) + "%";
 
   const failures = el("failures");

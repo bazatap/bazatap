@@ -174,6 +174,7 @@ function createState() {
     failures: /** @type {Record<string, number>} */ ({}),
     agents: /** @type {Record<string, number>} */ ({}),
     attempts: 0,
+    created: 0,
     completions: 0,
     recent: /** @type {any[]} */ ([]),
   };
@@ -188,8 +189,9 @@ function summarize(state) {
     operations: state.operations,
     checkout: {
       attempts: state.attempts,
+      created: state.created,
       completions: state.completions,
-      completionRate: state.attempts ? state.completions / state.attempts : null,
+      completionRate: state.created ? state.completions / state.created : null,
     },
     failures: Object.entries(state.failures)
       .map(([reason, count]) => ({ reason, count }))
@@ -238,6 +240,13 @@ function record(input) {
   if (agent) state.agents[agent] = (state.agents[agent] ?? 0) + 1;
   if (failure) state.failures[failure] = (state.failures[failure] ?? 0) + 1;
   if (operation === "checkout.create") state.attempts += 1;
+  if (
+    operation === "checkout.create" &&
+    status >= 200 &&
+    status < 300
+  ) {
+    state.created += 1;
+  }
   if (operation === "checkout.complete" && status >= 200 && status < 300) {
     state.completions += 1;
   }

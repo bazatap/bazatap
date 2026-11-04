@@ -20,6 +20,10 @@ async function upstreamServer() {
       return res.end(JSON.stringify(PROFILE));
     }
     if (req.method === "POST" && req.url === "/checkout-sessions") {
+      if (body.includes('"nope"')) {
+        res.writeHead(422, { "content-type": "application/json" });
+        return res.end(JSON.stringify({ error: { code: "invalid_request" } }));
+      }
       res.writeHead(201, { "content-type": "application/json" });
       return res.end(JSON.stringify({ id: "chk_1", echoed: body }));
     }
@@ -102,18 +106,33 @@ test("tap proxies traffic, records it and exposes a summary", async () => {
     assert.equal(order.status, 200);
     await order.json();
 
+    const invalid = await fetch(`${tap.url}/checkout-sessions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ line_items: "nope" }),
+    });
+    assert.equal(invalid.status, 422);
+
     const summary = tap.summary();
-    assert.equal(summary.requests, 4);
+    assert.equal(summary.requests, 5);
     assert.equal(summary.ucpRequests, 3);
-    assert.equal(summary.operations["checkout.create"], 1);
+    assert.equal(summary.operations["checkout.create"], 2);
     assert.equal(summary.operations["checkout.complete"], 1);
-    assert.deepEqual(summary.checkout, { attempts: 1, completions: 0, completionRate: 0 });
-    assert.equal(summary.failures[0].reason, "idempotency_conflict");
+    assert.deepEqual(summary.checkout, {
+      attempts: 2,
+      created: 1,
+      completions: 0,
+      completionRate: 0,
+    });
+    assert.deepEqual(
+      summary.failures.map((f) => f.reason).sort(),
+      ["idempotency_conflict", "invalid_request"],
+    );
     assert.equal(summary.agents[0].agent, "agent.example");
 
     const api = await fetch(`${tap.url}/__bazatap/api/summary`);
     assert.equal(api.status, 200);
-    assert.equal((await api.json()).requests, 4);
+    assert.equal((await api.json()).requests, 5);
 
     const dashboard = await fetch(`${tap.url}/__bazatap/`);
     assert.equal(dashboard.status, 200);
@@ -121,7 +140,7 @@ test("tap proxies traffic, records it and exposes a summary", async () => {
 
     assert.ok(existsSync(logPath));
     const lines = readFileSync(logPath, "utf8").trim().split("\n");
-    assert.equal(lines.length, 4);
+    assert.equal(lines.length, 5);
     const first = JSON.parse(lines[0]);
     assert.equal(first.operation, "discovery");
     assert.equal(first.checkoutId, undefined);
