@@ -27,5 +27,13 @@
     "src",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bazatap/bazatap.git"
+  },
+  "homepage": "https://github.com/bazatap/bazatap#readme",
+  "bugs": {
+    "url": "https://github.com/bazatap/bazatap/issues"
+  }
 }
