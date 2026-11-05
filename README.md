@@ -139,6 +139,20 @@ Most live profiles today are Shopify-generated and near-identical: same
 capabilities, same version, no signing keys. Scanning ten DTC stores tells you
 less than running one non-Shopify implementation.
 
+## Reports
+
+`reports/` holds published crawl results. Reproduce one:
+
+```sh
+npm run crawl -- scripts/seeds.txt --follow --schemas
+npm run report -- --from=out/2026-11-06/results.jsonl --compare=out/2026-11-04/results.jsonl
+```
+
+`--follow` resolves one redirect to the canonical host before applying the
+spec's no-redirect rule. `--schemas` fetches every declared schema, deduped by
+URL. `--compare` adds a "Changes since" section; an unchanged crawl renders as a
+single line. Raw rows stay in `out/`, which is gitignored.
+
 ## What it does not do
 
 - It does not install anything on the store and needs no credentials.

@@ -110,6 +110,59 @@ export function detectPlatform(row) {
   return "other";
 }
 
+/**
+ * Compare two crawls by domain. Only differences are returned, so an unchanged
+ * corpus produces an empty result and the report can say so in one line.
+ * @param {any[]} olderRows
+ * @param {any[]} newerRows
+ */
+export function compareRows(olderRows, newerRows) {
+  const older = new Map(olderRows.map((row) => [row.domain, row]));
+  const newer = new Map(newerRows.map((row) => [row.domain, row]));
+  const added = [...newer.keys()].filter((domain) => !older.has(domain)).sort();
+  const removed = [...older.keys()].filter((domain) => !newer.has(domain)).sort();
+  const changed = [];
+
+  for (const [domain, after] of newer) {
+    const before = older.get(domain);
+    if (!before) continue;
+    const fields = /** @type {Record<string, unknown>} */ ({});
+    for (const key of ["hasProfile", "httpStatus", "version", "keys", "grade", "score"]) {
+      if (before[key] !== after[key]) fields[key] = [before[key], after[key]];
+    }
+
+    const beforeFindings = new Set((before.findings ?? []).map((f) => f.code));
+    const afterFindings = new Set((after.findings ?? []).map((f) => f.code));
+    const findingsAdded = [...afterFindings].filter((x) => !beforeFindings.has(x)).sort();
+    const findingsRemoved = [...beforeFindings].filter((x) => !afterFindings.has(x)).sort();
+    if (findingsAdded.length || findingsRemoved.length) {
+      fields.findings = { added: findingsAdded, removed: findingsRemoved };
+    }
+
+    const beforeCaps = new Set(before.capabilityNames ?? []);
+    const afterCaps = new Set(after.capabilityNames ?? []);
+    const capsAdded = [...afterCaps].filter((x) => !beforeCaps.has(x)).sort();
+    const capsRemoved = [...beforeCaps].filter((x) => !afterCaps.has(x)).sort();
+    if (capsAdded.length || capsRemoved.length) {
+      fields.capabilities = { added: capsAdded, removed: capsRemoved };
+    }
+
+    if (Object.keys(fields).length > 0) changed.push({ domain, fields });
+  }
+
+  changed.sort((a, b) => a.domain.localeCompare(b.domain));
+  return {
+    added,
+    removed,
+    changed,
+    summary: {
+      added: added.length,
+      removed: removed.length,
+      changed: changed.length,
+    },
+  };
+}
+
 /** @param {Record<string, number>} counts */
 function sortCounts(counts) {
   return Object.entries(counts)

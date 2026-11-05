@@ -5,8 +5,8 @@
  *        node scripts/report.mjs out/2026-11-04
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
-import { summarize } from "../src/report-data.js";
+import { basename, dirname, join, resolve } from "node:path";
+import { compareRows, summarize } from "../src/report-data.js";
 
 const args = process.argv.slice(2);
 const options = new Map(
@@ -32,21 +32,44 @@ if (!existsSync(resultsPath)) {
   process.exit(2);
 }
 
-const rows = readFileSync(resultsPath, "utf8")
-  .split("\n")
-  .filter(Boolean)
-  .map((line) => JSON.parse(line));
-
-const metaPath = join(dirname(resultsPath), "meta.json");
-const meta = existsSync(metaPath) ? JSON.parse(readFileSync(metaPath, "utf8")) : {};
+const rows = readRows(resultsPath);
+const meta = readMeta(resultsPath);
 const summary = summarize(rows);
 const date = meta.crawledOn ?? (meta.crawledAt ?? new Date().toISOString()).slice(0, 10);
 const outPath = options.get("--out") ?? join(dirname(resultsPath), "report.md");
 
-writeFileSync(outPath, render(summary, date, rows));
+let comparison;
+let compareDate;
+const compareArg = options.get("--compare");
+if (compareArg) {
+  const comparePath = resolve(
+    compareArg.endsWith(".jsonl") ? compareArg : join(compareArg, "results.jsonl"),
+  );
+  if (!existsSync(comparePath)) {
+    console.error(`No results to compare at ${comparePath}`);
+    process.exit(2);
+  }
+  const compareMeta = readMeta(comparePath);
+  compareDate = compareMeta.crawledOn ?? basename(dirname(comparePath));
+  comparison = compareRows(readRows(comparePath), rows);
+}
+
+writeFileSync(outPath, render(summary, date, rows, comparison, compareDate));
 console.log(`report: ${outPath}`);
 
-function render(summary, date, rows) {
+function readRows(path) {
+  return readFileSync(path, "utf8")
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
+}
+
+function readMeta(resultsPath) {
+  const metaPath = join(dirname(resultsPath), "meta.json");
+  return existsSync(metaPath) ? JSON.parse(readFileSync(metaPath, "utf8")) : {};
+}
+
+function render(summary, date, rows, comparison, compareDate) {
   const pct = (n, d) => (d ? `${Math.round((n / d) * 100)}%` : "—");
   const lines = [];
   lines.push(`# State of Agent Commerce — ${date}`);
@@ -74,6 +97,35 @@ function render(summary, date, rows) {
     .join(", ");
   lines.push(`- Platform mix: ${platform || "—"}.`);
   lines.push("");
+
+  if (comparison) {
+    lines.push(`## Changes since ${compareDate}`);
+    lines.push("");
+    if (
+      comparison.added.length === 0 &&
+      comparison.removed.length === 0 &&
+      comparison.changed.length === 0
+    ) {
+      lines.push(`No changes across ${summary.total} domains.`);
+    } else {
+      lines.push(
+        `${comparison.summary.added} added, ${comparison.summary.removed} removed, ${comparison.summary.changed} changed.`,
+      );
+      lines.push("");
+      lines.push("| Domain | Change |");
+      lines.push("| --- | --- |");
+      for (const domain of comparison.added) {
+        lines.push(`| ${domain} | added to the crawl |`);
+      }
+      for (const domain of comparison.removed) {
+        lines.push(`| ${domain} | no longer in the crawl |`);
+      }
+      for (const entry of comparison.changed) {
+        lines.push(`| ${entry.domain} | ${describeChange(entry.fields)} |`);
+      }
+    }
+    lines.push("");
+  }
 
   lines.push("## By category");
   lines.push("");
@@ -160,4 +212,29 @@ function render(summary, date, rows) {
   );
   lines.push("");
   return lines.join("\n");
+}
+
+/** @param {Record<string, any>} fields */
+function describeChange(fields) {
+  const parts = [];
+  for (const [key, value] of Object.entries(fields)) {
+    if (key === "findings") {
+      const bits = [];
+      if (value.added.length) bits.push(`+${value.added.join(", +")}`);
+      if (value.removed.length) bits.push(`−${value.removed.join(", −")}`);
+      parts.push(bits.join(" "));
+    } else if (key === "capabilities") {
+      const bits = [];
+      if (value.added.length) bits.push(`+${value.added.join(", +")}`);
+      if (value.removed.length) bits.push(`−${value.removed.join(", −")}`);
+      parts.push(`capabilities ${bits.join(" ")}`);
+    } else if (key === "hasProfile") {
+      parts.push(value[1] ? "started serving a profile" : "stopped serving a profile");
+    } else if (key === "score") {
+      parts.push(`score ${value[0]} → ${value[1]}`);
+    } else {
+      parts.push(`${key} ${value[0]} → ${value[1]}`);
+    }
+  }
+  return parts.join("; ");
 }

@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { detectPlatform, summarize } from "../src/report-data.js";
+import { compareRows, detectPlatform, summarize } from "../src/report-data.js";
 
 const rows = [
   {
@@ -88,4 +88,64 @@ test("detectPlatform reads the vendor namespace", () => {
     "other",
   );
   assert.equal(detectPlatform({ capabilityNames: [], transports: [] }), "unknown");
+});
+
+test("compareRows reports no changes for identical rows", () => {
+  const rowsA = [
+    {
+      domain: "x.example",
+      hasProfile: true,
+      httpStatus: 200,
+      version: "2026-08-25",
+      keys: 0,
+      findings: [{ code: "NO_KEYS" }],
+      capabilityNames: ["a"],
+    },
+  ];
+  const diff = compareRows(rowsA, structuredClone(rowsA));
+  assert.deepEqual(diff.summary, { added: 0, removed: 0, changed: 0 });
+});
+
+test("compareRows reports version, key, finding and capability changes", () => {
+  const before = {
+    domain: "x.example",
+    hasProfile: true,
+    httpStatus: 200,
+    version: "2026-08-25",
+    keys: 0,
+    findings: [{ code: "NO_KEYS" }],
+    capabilityNames: ["a", "b"],
+  };
+  const after = {
+    domain: "x.example",
+    hasProfile: true,
+    httpStatus: 200,
+    version: "2026-11-12",
+    keys: 2,
+    findings: [{ code: "NO_KEYS" }, { code: "SCHEMA_STATUS" }],
+    capabilityNames: ["a", "c"],
+  };
+  const diff = compareRows([before], [after]);
+  assert.equal(diff.changed.length, 1);
+  const fields = diff.changed[0].fields;
+  assert.deepEqual(fields.version, ["2026-08-25", "2026-11-12"]);
+  assert.deepEqual(fields.keys, [0, 2]);
+  assert.deepEqual(fields.findings, { added: ["SCHEMA_STATUS"], removed: [] });
+  assert.deepEqual(fields.capabilities, { added: ["c"], removed: ["b"] });
+});
+
+test("compareRows reports added, removed and lost profiles", () => {
+  const before = [
+    { domain: "gone.example", hasProfile: true, httpStatus: 200 },
+    { domain: "lost.example", hasProfile: true, httpStatus: 200 },
+  ];
+  const after = [
+    { domain: "lost.example", hasProfile: false, httpStatus: 404 },
+    { domain: "new.example", hasProfile: true, httpStatus: 200 },
+  ];
+  const diff = compareRows(before, after);
+  assert.deepEqual(diff.added, ["new.example"]);
+  assert.deepEqual(diff.removed, ["gone.example"]);
+  assert.deepEqual(diff.changed[0].domain, "lost.example");
+  assert.deepEqual(diff.changed[0].fields.hasProfile, [true, false]);
 });
