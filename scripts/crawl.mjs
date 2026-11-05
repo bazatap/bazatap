@@ -23,7 +23,7 @@ const options = new Map(
 const positional = args.filter((a) => !a.startsWith("-"));
 
 const seedsPath = positional[0] ?? join(here, "seeds.txt");
-const date = new Date().toISOString().slice(0, 10);
+const date = localDate();
 const outDir = options.get("--out") ?? join(here, "..", "out", date);
 const limit = Number(options.get("--limit") ?? Infinity);
 const concurrency = Number(options.get("--concurrency") ?? 6);
@@ -104,6 +104,7 @@ writeFileSync(
   JSON.stringify(
     {
       crawledAt: new Date().toISOString(),
+      crawledOn: date,
       seeds: seedsPath,
       count: rows.length,
       schemas,
@@ -120,6 +121,16 @@ const served = rows.filter((row) => row.hasProfile).length;
 console.log(`\n${served}/${rows.length} served a profile`);
 console.log(`results: ${resultsPath}`);
 console.log(`report:  node scripts/report.mjs --from=${resultsPath}`);
+
+/** Local calendar date, so a run at 09:00 local does not land on yesterday's folder. */
+function localDate() {
+  const now = new Date();
+  return [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0"),
+  ].join("-");
+}
 
 /** @param {{domain: string, category: string}} seed */
 async function crawlOne(seed) {

@@ -40,7 +40,7 @@ const rows = readFileSync(resultsPath, "utf8")
 const metaPath = join(dirname(resultsPath), "meta.json");
 const meta = existsSync(metaPath) ? JSON.parse(readFileSync(metaPath, "utf8")) : {};
 const summary = summarize(rows);
-const date = (meta.crawledAt ?? rows[0]?.crawledAt ?? new Date().toISOString()).slice(0, 10);
+const date = meta.crawledOn ?? (meta.crawledAt ?? new Date().toISOString()).slice(0, 10);
 const outPath = options.get("--out") ?? join(dirname(resultsPath), "report.md");
 
 writeFileSync(outPath, render(summary, date, rows));
