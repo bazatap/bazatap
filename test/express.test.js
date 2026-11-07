@@ -86,6 +86,7 @@ test("middleware records the checkout lifecycle", async () => {
     assert.equal(summary.failures[0].reason, "invalid_request");
     assert.equal(summary.agents[0].agent, "gemini.google.com");
 
+    await app.middleware.flush();
     const lines = readFileSync(logPath, "utf8").trim().split("\n");
     assert.equal(lines.length, 3);
     const checkout = JSON.parse(lines[1]);
@@ -108,6 +109,7 @@ test("middleware leaves bodies empty with bodies=false", async () => {
 
   try {
     await (await fetch(`${app.url}/checkout-sessions`)).json();
+    await app.middleware.flush();
     const row = JSON.parse(readFileSync(logPath, "utf8").trim());
     assert.equal(row.requestBody, "");
     assert.equal(row.responseBody, "");

@@ -65,6 +65,7 @@ export function bazatap(options = {}) {
   };
 
   middleware.summary = () => recorder.summary();
+  middleware.flush = () => recorder.flush();
   middleware.close = () => recorder.close();
   return middleware;
 }

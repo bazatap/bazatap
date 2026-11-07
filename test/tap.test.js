@@ -138,6 +138,7 @@ test("tap proxies traffic, records it and exposes a summary", async () => {
     assert.equal(dashboard.status, 200);
     assert.match(await dashboard.text(), /bazatap/);
 
+    await tap.flush();
     assert.ok(existsSync(logPath));
     const lines = readFileSync(logPath, "utf8").trim().split("\n");
     assert.equal(lines.length, 5);
@@ -162,6 +163,7 @@ test("tap does not record bodies with bodies=false", async () => {
       body: JSON.stringify({ secret: "do-not-record-me" }),
     });
     await res.json();
+    await tap.flush();
     const entry = JSON.parse(readFileSync(logPath, "utf8").trim());
     assert.equal(entry.requestBody, "");
     assert.equal(entry.responseBody, "");

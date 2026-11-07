@@ -160,11 +160,13 @@ export async function startTap(options) {
       upstream.origin + (upstream.pathname === "/" ? "" : upstream.pathname),
     logPath: options.logPath,
     summary: () => recorder.summary(),
+    flush: () => recorder.flush(),
     close: () =>
       new Promise((resolve) => {
-        recorder.close();
         server.closeAllConnections?.();
-        server.close(resolve);
+        server.close(() => {
+          recorder.close().then(resolve);
+        });
       }),
   };
 }

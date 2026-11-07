@@ -14,6 +14,8 @@ export function createRecorder(options = {}) {
   const maxBodyBytes = options.maxBodyBytes ?? 64 * 1024;
   const state = createState();
   const log = openLog(options.logPath);
+  let pendingWrites = 0;
+  const flushWaiters = /** @type {Array<() => void>} */ ([]);
 
   return {
     /**
@@ -81,6 +83,7 @@ export function createRecorder(options = {}) {
 
       if (log) {
         try {
+          pendingWrites += 1;
           log.write(
             `${JSON.stringify({
               ...row,
@@ -88,6 +91,12 @@ export function createRecorder(options = {}) {
               requestBody: truncate(reqBody, maxBodyBytes),
               responseBody: truncate(resBody, maxBodyBytes),
             })}\n`,
+            () => {
+              pendingWrites -= 1;
+              if (pendingWrites === 0) {
+                for (const resolve of flushWaiters.splice(0)) resolve();
+              }
+            },
           );
         } catch {
           // A broken log must never break the request.
@@ -97,8 +106,18 @@ export function createRecorder(options = {}) {
 
     summary: () => summarize(state),
 
+    /** Resolve once every queued row is on disk. */
+    flush() {
+      if (pendingWrites === 0) return Promise.resolve();
+      return new Promise((resolve) => flushWaiters.push(resolve));
+    },
+
+    /** Flush and close the log stream. */
     close() {
-      log?.end();
+      return new Promise((resolve) => {
+        if (!log) return resolve();
+        log.end(() => resolve());
+      });
     },
   };
 }
