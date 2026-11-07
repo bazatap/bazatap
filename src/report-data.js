@@ -127,8 +127,16 @@ export function compareRows(olderRows, newerRows) {
     const before = older.get(domain);
     if (!before) continue;
     const fields = /** @type {Record<string, unknown>} */ ({});
-    for (const key of ["hasProfile", "httpStatus", "version", "keys", "grade", "score"]) {
+    for (const key of ["hasProfile", "version", "keys", "grade", "score"]) {
       if (before[key] !== after[key]) fields[key] = [before[key], after[key]];
+    }
+    // A 403/404/429 flip between two non-serving responses is WAF or rate-limit
+    // noise, not an ecosystem change. Only report status when someone served.
+    if (
+      before.httpStatus !== after.httpStatus &&
+      (before.hasProfile || after.hasProfile)
+    ) {
+      fields.httpStatus = [before.httpStatus, after.httpStatus];
     }
 
     const beforeFindings = new Set((before.findings ?? []).map((f) => f.code));

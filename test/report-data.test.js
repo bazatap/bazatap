@@ -149,3 +149,17 @@ test("compareRows reports added, removed and lost profiles", () => {
   assert.deepEqual(diff.changed[0].domain, "lost.example");
   assert.deepEqual(diff.changed[0].fields.hasProfile, [true, false]);
 });
+
+test("compareRows ignores status flips between non-serving responses", () => {
+  const before = [
+    { domain: "waf.example", hasProfile: false, httpStatus: 429 },
+    { domain: "gone.example", hasProfile: true, httpStatus: 200 },
+  ];
+  const after = [
+    { domain: "waf.example", hasProfile: false, httpStatus: 404 },
+    { domain: "gone.example", hasProfile: false, httpStatus: 404 },
+  ];
+  const diff = compareRows(before, after);
+  assert.deepEqual(diff.changed.map((entry) => entry.domain), ["gone.example"]);
+  assert.deepEqual(diff.changed[0].fields.hasProfile, [true, false]);
+});
