@@ -1,5 +1,7 @@
 # bazatap
 
+[![npm](https://img.shields.io/npm/v/bazatap.svg)](https://www.npmjs.com/package/bazatap)
+
 See why AI agents fail to buy from a store.
 
 An AI agent finds the store, tries to buy, and fails. Today you find out from a
@@ -8,13 +10,6 @@ support ticket. `bazatap` tells you why — before the agent gives up.
 ```sh
 npx bazatap scan shop.example.com
 ```
-
-> Not on npm yet. Until 0.2.0 is published:
->
-> ```sh
-> git clone https://github.com/bazatap/bazatap && cd bazatap
-> node bin/bazatap.js scan shop.example.com
-> ```
 
 Two commands: `scan` checks what an agent can discover, `tap` records what
 actually happened when it tried. Crawl results live in [reports/](reports/).
@@ -98,7 +93,8 @@ npx bazatap scan <domain>
 npm install -g bazatap
 ```
 
-Requires Node 20+. No dependencies, no build step.
+Requires Node 20+. No dependencies, no build step. Also on
+[npm](https://www.npmjs.com/package/bazatap).
 
 ## Middleware — no proxy
 
